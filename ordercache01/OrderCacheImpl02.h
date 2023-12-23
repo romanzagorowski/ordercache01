@@ -1,26 +1,11 @@
 #pragma once
 
 #include "OrderCacheInterface.h"
+#include "OrderHash.h"
+#include "OrderCompare.h"
 
 #include <unordered_set>
-
-struct OrderCompare
-{
-    bool operator () (const Order& o1, const Order& o2) const
-    {
-        return o1.orderId() == o2.orderId();
-    }
-};
-
-struct OrderHash
-{
-    std::hash<std::string> hash;
-
-    std::size_t operator () (const Order& o) const
-    {
-        return hash(o.orderId());
-    }
-};
+#include <map>
 
 class OrderCacheImpl02 : public OrderCacheInterface
 {
@@ -44,5 +29,9 @@ public:
     std::vector<Order> getAllOrders() const override;
 
 private:
-    std::unordered_set<Order, OrderHash, OrderCompare> orders;
+    std::unordered_set<Order, OrderHash, OrderCompare> order_uset;
+
+    std::map<std::string, std::vector<decltype(order_uset)::const_iterator>> security_order_map;
+    std::map<std::string, std::vector<decltype(order_uset)::const_iterator>>     user_order_map;
+    std::map<std::string, std::vector<decltype(order_uset)::const_iterator>>  company_order_map;
 };

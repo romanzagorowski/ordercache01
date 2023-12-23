@@ -24,6 +24,9 @@
     <ClCompile Include="OrderCacheImpl02.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="OrderCacheImpl02Test.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="OrderCacheInterface.h">
@@ -35,5 +38,20 @@
     <ClInclude Include="OrderCacheImpl02.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="OrderCompare.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Order.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OrderHash.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IdOnlyOrder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
