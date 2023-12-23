@@ -4,20 +4,21 @@
 
 #include <unordered_set>
 
-struct OrderComparer
+struct OrderCompare
 {
     bool operator () (const Order& o1, const Order& o2) const
     {
-        return true;
+        return o1.orderId() == o2.orderId();
     }
 };
 
-struct OrderHasher
+struct OrderHash
 {
+    std::hash<std::string> hash;
+
     std::size_t operator () (const Order& o) const
     {
-        std::hash<std::string> h{};
-        return h(o.orderId());
+        return hash(o.orderId());
     }
 };
 
@@ -43,5 +44,5 @@ public:
     std::vector<Order> getAllOrders() const override;
 
 private:
-    std::unordered_set<Order, OrderHasher, OrderComparer> orders;
+    std::unordered_set<Order, OrderHash, OrderCompare> orders;
 };
