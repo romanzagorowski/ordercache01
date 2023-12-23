@@ -2,9 +2,9 @@
 
 #include "OrderCacheInterface.h"
 
-#include <unordered_map>
+#include <unordered_set>
 
-class OrderCacheImpl01 : public OrderCacheInterface
+class OrderCacheImpl02 : public OrderCacheInterface
 {
 public:
     // add order to the cache
@@ -26,5 +26,5 @@ public:
     std::vector<Order> getAllOrders() const override;
 
 private:
-    std::unordered_map<std::string, Order> orders;
+    std::unordered_set<Order> orders;
 };

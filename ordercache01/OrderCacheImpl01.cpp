@@ -2,7 +2,7 @@
 
 void OrderCacheImpl01::addOrder(Order order)
 {
-    throw "Not implemented yet";
+    auto p = orders.insert(std::make_pair(order.orderId(), order));
 }
 
 void OrderCacheImpl01::cancelOrder(const std::string& orderId)
@@ -27,5 +27,5 @@ unsigned int OrderCacheImpl01::getMatchingSizeForSecurity(const std::string& sec
 
 std::vector<Order> OrderCacheImpl01::getAllOrders() const
 {
-    throw "Not implemented yet";
+    return std::vector<Order>{};
 }
