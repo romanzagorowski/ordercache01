@@ -2,7 +2,7 @@
 
 void OrderCacheImpl02::addOrder(Order order)
 {
-    //auto p = orders.insert(order);
+    auto p = orders.insert(order);
     //auto p = orders.insert(std::move(order));
 }
 

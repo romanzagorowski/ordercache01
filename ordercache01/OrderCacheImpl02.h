@@ -4,6 +4,14 @@
 
 #include <unordered_set>
 
+struct OrderComparer
+{
+    bool operator () (const Order& o1, const Order& o2) const
+    {
+        return o1.orderId() == o2.orderId();
+    }
+};
+
 class OrderCacheImpl02 : public OrderCacheInterface
 {
 public:
@@ -26,5 +34,5 @@ public:
     std::vector<Order> getAllOrders() const override;
 
 private:
-    std::unordered_set<Order> orders;
+    std::unordered_set<Order, OrderComparer> orders;
 };
