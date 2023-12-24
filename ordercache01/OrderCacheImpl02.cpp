@@ -106,50 +106,93 @@ void OrderCacheImpl02::cancelOrdersForSecIdWithMinimumQty(const std::string& sec
     }
 }
 
+bool operator < (
+    const std::pair<std::unordered_set<Order>::iterator, unsigned int>& lhs,
+    const std::pair<std::unordered_set<Order>::iterator, unsigned int>& rhs
+    )
+{
+    return lhs.first->orderId() < rhs.first->orderId();
+}
+
 unsigned int OrderCacheImpl02::getMatchingSizeForSecurity(const std::string& securityId)
 {
-    /*
-    std::set<
-        std::pair<std::unordered_set<Order>::iterator, unsigned int>
-    > sell_orders, buy_orders
-        ;
+    std::vector<std::pair<std::unordered_set<Order>::iterator, unsigned int>> sell_orders, buy_orders;
 
-    // Get all security sell orders ordered by company
-
-    auto& security_orders = security_order_map[securityId]; // a reference to a collection of iterators to orders
-
-    for(auto& it_order : security_orders)
+    // TODO: Populate sell and buy orders vector.
+    for(auto& it_order : security_order_map[securityId])
     {
         if(it_order->side() == "sell")
         {
-            sell_orders.insert(std::make_pair(it_order, it_order->qty()));
+            sell_orders.push_back(std::make_pair(it_order, it_order->qty()));
         }
         else
         {
-            buy_orders.insert(std::make_pair(it_order, it_order->qty()));
+            buy_orders.push_back(std::make_pair(it_order, it_order->qty()));
         }
     }
 
-    auto it_buy_order = buy_orders.begin();
+    // TODO: Sort one vector ascending and another descending.
+    std::sort(sell_orders.begin(), sell_orders.end());
+    std::sort(buy_orders.begin(), buy_orders.end());
 
-    for(auto& pair : sell_orders)
+    //---
+
+    unsigned int total_matched_qty = 0;
+
+    for(auto&& it_sell_pair = sell_orders.begin(); it_sell_pair != sell_orders.end(); ++it_sell_pair)
     {
-        // TODO: Continue from here...
+        auto& [it_sell_order, sell_qty_left] = *it_sell_pair;
 
-    }
-    */
-
-    /*
-    for(auto& [it_sell_order, remaining_qty] : sell_orders)
-    {
-        for(auto& [it_buy_order, remaining_qty] : buy_orders)
+        for(auto&& it_buy_pair = buy_orders.rbegin(); it_buy_pair != buy_orders.rend(); ++it_buy_pair)
         {
+            auto& [it_buy_order, buy_qty_left] = *it_buy_pair;
 
+            if(it_sell_order->company() != it_buy_order->company() && buy_qty_left != 0)
+            {
+                if(sell_qty_left > buy_qty_left)
+                {
+                    const unsigned int matched_qty = buy_qty_left;
+
+                    total_matched_qty += matched_qty;
+
+                    sell_qty_left -= matched_qty;
+                    buy_qty_left = 0;
+
+                    // buy_qty_left has been depleted
+                    // take the next buy_order
+                    continue;
+                }
+                else if(sell_qty_left < buy_qty_left)
+                {
+                    const unsigned int matched_qty = sell_qty_left;
+
+                    total_matched_qty += matched_qty;
+
+                    sell_qty_left = 0;
+                    buy_qty_left -= matched_qty;
+
+                    // sell_qty_left has been depleted
+                    // take the next sell_order
+                    break;
+                }
+                else // sell_qty_left == buy_qty_left
+                {
+                    const unsigned int matched_qty = sell_qty_left;
+
+                    total_matched_qty += matched_qty;
+
+                    sell_qty_left = 0;
+                    buy_qty_left = 0;
+
+                    // sell_qty_left has been depleted
+                    // take the next sell_order
+                    break;
+                }
+            }
         }
     }
-    */
 
-    return 0;
+    return total_matched_qty;
 }
 
 std::vector<Order> OrderCacheImpl02::getAllOrders() const
