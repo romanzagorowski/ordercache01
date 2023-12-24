@@ -33,7 +33,7 @@ TEST(OrderCacheImpl02Test, ReturnsAllAddedOrders)
     EXPECT_EQ(added_orders, returned_orders);
 }
 
-TEST(OrderCacheImpl02Test, DoesNotReturnCanceledOrders)
+TEST(OrderCacheImpl02Test, CancelsOrders)
 {
     const std::vector<Order> added_orders{
         {"o1", "s1", "sell", 100, "u1", "c1"},
@@ -66,6 +66,43 @@ TEST(OrderCacheImpl02Test, DoesNotReturnCanceledOrders)
     cache.cancelOrder("o4");
     cache.cancelOrder("o6");
     cache.cancelOrder("o8");
+
+    const auto returned_orders = cache.getAllOrders();
+
+    EXPECT_EQ(expected_orders, returned_orders);
+}
+
+TEST(OrderCacheImpl02Test, CancelsUserOrders)
+{
+    const std::vector<Order> added_orders{
+        {"o1", "s1", "sell", 100, "u1", "c1"},
+        {"o4", "s1", "sell", 100, "u2", "c1"},
+        {"o2", "s1", "sell", 100, "u1", "c1"},
+        {"o5", "s1", "sell", 100, "u2", "c1"},
+        {"o3", "s1", "sell", 100, "u1", "c1"},
+        {"o7", "s1", "sell", 100, "u3", "c1"},
+        {"o6", "s1", "sell", 100, "u2", "c1"},
+        {"o8", "s1", "sell", 100, "u3", "c1"},
+        {"o9", "s1", "sell", 100, "u3", "c1"},
+    };
+
+    const std::vector<Order> expected_orders{
+        {"o1", "s1", "sell", 100, "u1", "c1"},
+        {"o2", "s1", "sell", 100, "u1", "c1"},
+        {"o3", "s1", "sell", 100, "u1", "c1"},
+        {"o7", "s1", "sell", 100, "u3", "c1"},
+        {"o8", "s1", "sell", 100, "u3", "c1"},
+        {"o9", "s1", "sell", 100, "u3", "c1"},
+    };
+
+    OrderCacheImpl02 cache;
+
+    for(const auto& order : added_orders)
+    {
+        cache.addOrder(order);
+    }
+
+    cache.cancelOrdersForUser("u2");
 
     const auto returned_orders = cache.getAllOrders();
 

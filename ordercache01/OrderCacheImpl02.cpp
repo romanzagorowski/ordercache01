@@ -97,6 +97,12 @@ void OrderCacheImpl02::cancelOrdersForSecIdWithMinimumQty(const std::string& sec
             it_it_order = std::next(it_it_order);
         }
     }
+
+    // If all orders for security has been removed - remove the security from the index.
+    if(security_orders.empty())
+    {
+        security_order_map.erase(securityId);
+    }
 }
 
 unsigned int OrderCacheImpl02::getMatchingSizeForSecurity(const std::string& securityId)
