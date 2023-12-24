@@ -2,14 +2,15 @@
 #include "IdOnlyOrder.h"
 
 #include <algorithm>
+#include <set>
 
 void OrderCacheImpl02::addOrder(Order order)
 {
     if(const auto& [it, inserted] = order_uset.insert(order); inserted)
     {
         security_order_map[it->securityId()].push_back(it);
-            user_order_map[it->securityId()].push_back(it);
-         company_order_map[it->securityId()].push_back(it);
+        user_order_map[it->user()].push_back(it);
+        company_order_map[it->company()].push_back(it);
     }
 }
 
@@ -19,7 +20,7 @@ void removeOrderFromIndex(
     std::unordered_set<Order>::const_iterator it_order
 )
 {
-    auto it_key_orders = index.begin(); 
+    auto it_key_orders = index.begin();
 
     while(it_key_orders != index.end())
     {
@@ -60,8 +61,8 @@ void OrderCacheImpl02::cancelOrdersForUser(const std::string& user)
     {
         // ...other indexes.
         removeOrderFromIndex(security_order_map, it_order);
-        removeOrderFromIndex( company_order_map, it_order);
-        
+        removeOrderFromIndex(company_order_map, it_order);
+
         // ...orders table.
         order_uset.erase(it_order);
     }
@@ -72,7 +73,7 @@ void OrderCacheImpl02::cancelOrdersForUser(const std::string& user)
 
 void OrderCacheImpl02::cancelOrdersForSecIdWithMinimumQty(const std::string& securityId, unsigned int minQty)
 {
-    auto& security_orders = security_order_map[securityId]; // a reference to a vector
+    auto& security_orders = security_order_map[securityId]; // a reference to a collection of iterators to orders
 
     auto it_it_order = security_orders.begin();
 
@@ -83,10 +84,10 @@ void OrderCacheImpl02::cancelOrdersForSecIdWithMinimumQty(const std::string& sec
         if(it_order->qty() >= minQty)
         {
             // Remove order from other indexes.
-            removeOrderFromIndex(   user_order_map, it_order);
+            removeOrderFromIndex(user_order_map, it_order);
             removeOrderFromIndex(company_order_map, it_order);
 
-            // Remove the order from the index itself.
+            // Remove the order from the security index itself.
             it_it_order = security_orders.erase(it_it_order);
 
             // Remove the order from the orders table.
@@ -107,7 +108,48 @@ void OrderCacheImpl02::cancelOrdersForSecIdWithMinimumQty(const std::string& sec
 
 unsigned int OrderCacheImpl02::getMatchingSizeForSecurity(const std::string& securityId)
 {
-    throw "Not implemented yet";
+    /*
+    std::set<
+        std::pair<std::unordered_set<Order>::iterator, unsigned int>
+    > sell_orders, buy_orders
+        ;
+
+    // Get all security sell orders ordered by company
+
+    auto& security_orders = security_order_map[securityId]; // a reference to a collection of iterators to orders
+
+    for(auto& it_order : security_orders)
+    {
+        if(it_order->side() == "sell")
+        {
+            sell_orders.insert(std::make_pair(it_order, it_order->qty()));
+        }
+        else
+        {
+            buy_orders.insert(std::make_pair(it_order, it_order->qty()));
+        }
+    }
+
+    auto it_buy_order = buy_orders.begin();
+
+    for(auto& pair : sell_orders)
+    {
+        // TODO: Continue from here...
+
+    }
+    */
+
+    /*
+    for(auto& [it_sell_order, remaining_qty] : sell_orders)
+    {
+        for(auto& [it_buy_order, remaining_qty] : buy_orders)
+        {
+
+        }
+    }
+    */
+
+    return 0;
 }
 
 std::vector<Order> OrderCacheImpl02::getAllOrders() const
