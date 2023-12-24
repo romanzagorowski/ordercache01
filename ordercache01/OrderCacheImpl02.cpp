@@ -8,8 +8,33 @@ void OrderCacheImpl02::addOrder(Order order)
     if(const auto& [it, inserted] = order_uset.insert(order); inserted)
     {
         security_order_map[it->securityId()].push_back(it);
-        user_order_map[it->securityId()].push_back(it);
-        company_order_map[it->securityId()].push_back(it);
+            user_order_map[it->securityId()].push_back(it);
+         company_order_map[it->securityId()].push_back(it);
+    }
+}
+
+static
+void removeOrderFromIndex(
+    std::map<std::string, std::vector<std::unordered_set<Order>::const_iterator>>& index,
+    std::unordered_set<Order>::const_iterator it_order
+)
+{
+    auto it_key_orders = index.begin(); 
+
+    while(it_key_orders != index.end())
+    {
+        auto& [user, orders] = *it_key_orders;
+
+        orders.erase(std::find(orders.begin(), orders.end(), it_order));
+
+        if(orders.empty())
+        {
+            it_key_orders = index.erase(it_key_orders);
+        }
+        else
+        {
+            it_key_orders = std::next(it_key_orders);
+        }
     }
 }
 
@@ -18,53 +43,60 @@ void OrderCacheImpl02::cancelOrder(const std::string& orderId)
     // I need the iterator to the order to remove it from indexes...
     const auto it_order = order_uset.find(IdOnlyOrder{ orderId });
 
-    // If there is such an order...
     if(it_order != order_uset.end())
     {
-
-        {
-            //--- user_order_map
-            for(auto it = user_order_map.begin(); it != user_order_map.end();)
-            {
-                auto& [user, orders] = *it;
-
-                if(orders.erase(std::find(orders.begin(), orders.end(), it_order)) == orders.end())
-                {
-                    // It was the last order for this "user" in the map. Erase it from the map.
-                    it = user_order_map.erase(it);
-                }
-                else
-                {
-                    it = std::next(it);
-                }
-            }
-
-            // TODO: Remove the order from the other indexes.
-        }
-
-        // Finaly remove the order from orders.
-        order_uset.erase(it_order);
+        removeOrderFromIndex(user_order_map, it_order);
+        removeOrderFromIndex(security_order_map, it_order);
+        removeOrderFromIndex(company_order_map, it_order);
     }
+
+    order_uset.erase(it_order);
 }
 
 void OrderCacheImpl02::cancelOrdersForUser(const std::string& user)
 {
-    for(const auto& it : user_order_map[user])
+    // Remove user's orders from...
+    for(const auto& it_order : user_order_map[user])
     {
-
+        // ...other indexes.
+        removeOrderFromIndex(security_order_map, it_order);
+        removeOrderFromIndex( company_order_map, it_order);
+        
+        // ...orders table.
+        order_uset.erase(it_order);
     }
 
-    for(const auto& it : user_order_map[user])
-    {
-        order_uset.erase(it);
-    }
-
+    // Remove user and its orders from the index.
     user_order_map.erase(user);
 }
 
 void OrderCacheImpl02::cancelOrdersForSecIdWithMinimumQty(const std::string& securityId, unsigned int minQty)
 {
-    throw "Not implemented yet";
+    auto& security_orders = security_order_map[securityId]; // a reference to a vector
+
+    auto it_it_order = security_orders.begin();
+
+    while(it_it_order != security_orders.end())
+    {
+        auto it_order = *it_it_order;
+
+        if(it_order->qty() >= minQty)
+        {
+            // Remove order from other indexes.
+            removeOrderFromIndex(   user_order_map, it_order);
+            removeOrderFromIndex(company_order_map, it_order);
+
+            // Remove the order from the index itself.
+            it_it_order = security_orders.erase(it_it_order);
+
+            // Remove the order from the orders table.
+            this->order_uset.erase(it_order);
+        }
+        else
+        {
+            it_it_order = std::next(it_it_order);
+        }
+    }
 }
 
 unsigned int OrderCacheImpl02::getMatchingSizeForSecurity(const std::string& securityId)
