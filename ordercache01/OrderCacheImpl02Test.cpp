@@ -169,19 +169,18 @@ TEST(OrderCacheImpl02Test, CancelsSecurityOrdersWithMinQty)
     EXPECT_EQ(expected_orders, returned_orders);
 }
 
-/*
 TEST(OrderCacheImpl02Test, MatchesOrders)
 {
     const std::vector<Order> added_orders{
-        {"o1", "s1", "sell", 100, "u1", "c1"},
-        {"o2", "s1", "sell", 100, "u1", "c1"},
-        {"o3", "s1", "sell", 100, "u1", "c1"},
-        {"o4", "s1", "sell", 100, "u1", "c1"},
-        {"o5", "s1", "sell", 100, "u1", "c1"},
-        {"o6", "s1", "sell", 100, "u1", "c1"},
-        {"o7", "s1", "sell", 100, "u1", "c1"},
-        {"o8", "s1", "sell", 100, "u1", "c1"},
-        {"o9", "s1", "sell", 100, "u1", "c1"},
+        {"o1", "s1", "sell", 300, "u1", "c1"},
+        {"o2", "s1", "sell", 200, "u1", "c2"},
+        {"o3", "s1", "sell", 100, "u1", "c3"},
+        {"o4", "s1", "sell", 400, "u1", "c4"},
+        {"o5", "s1", "buy" , 100, "u1", "c1"},
+        {"o6", "s1", "buy" , 200, "u1", "c2"},
+        {"o7", "s1", "buy" , 200, "u1", "c3"},
+        {"o8", "s1", "buy" , 100, "u1", "c4"},
+        {"o9", "s1", "buy" , 300, "u1", "c5"},
     };
 
     OrderCacheImpl02 cache;
@@ -193,6 +192,5 @@ TEST(OrderCacheImpl02Test, MatchesOrders)
 
     const auto matched_amount = cache.getMatchingSizeForSecurity("s1");
 
-    EXPECT_EQ(matched_amount, 0);
+    EXPECT_EQ(matched_amount, 900);
 }
-*/

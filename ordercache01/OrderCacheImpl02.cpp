@@ -26,7 +26,10 @@ void removeOrderFromIndex(
     {
         auto& [user, orders] = *it_key_orders;
 
-        orders.erase(std::find(orders.begin(), orders.end(), it_order));
+        if(auto it_found = std::find(orders.begin(), orders.end(), it_order); it_found != orders.end())
+        {
+            orders.erase(it_found);
+        }
 
         if(orders.empty())
         {
@@ -106,7 +109,6 @@ void OrderCacheImpl02::cancelOrdersForSecIdWithMinimumQty(const std::string& sec
     }
 }
 
-/*
 bool operator < (
     const std::pair<std::unordered_set<Order>::iterator, unsigned int>& lhs,
     const std::pair<std::unordered_set<Order>::iterator, unsigned int>& rhs
@@ -114,12 +116,11 @@ bool operator < (
 {
     return lhs.first->orderId() < rhs.first->orderId();
 }
-*/
 
 unsigned int OrderCacheImpl02::getMatchingSizeForSecurity(const std::string& securityId)
 {
     unsigned int total_matched_qty = 0;
-/*
+
     std::vector<std::pair<std::unordered_set<Order>::iterator, unsigned int>> sell_orders, buy_orders;
 
     // TODO: Populate sell and buy orders vector.
@@ -193,7 +194,7 @@ unsigned int OrderCacheImpl02::getMatchingSizeForSecurity(const std::string& sec
             }
         }
     }
-*/
+
     return total_matched_qty;
 }
 
