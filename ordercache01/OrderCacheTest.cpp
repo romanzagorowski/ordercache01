@@ -2,7 +2,7 @@
 #include <ostream>
 #include <algorithm>
 
-#include "OrderCacheImpl02.h"
+#include "OrderCache.h"
 
 std::ostream& operator << (std::ostream& os, const Order& o)
 {
@@ -27,7 +27,7 @@ bool operator < (const Order& o1, const Order& o2)
     return o1.orderId() < o2.orderId();
 }
 
-TEST(OrderCacheImpl02Test, ReturnsAllAddedOrders)
+TEST(OrderCacheTest, ReturnsAllAddedOrders)
 {
     const std::vector<Order> added_orders{
         {"o1", "s1", "sell", 100, "u1", "c1"},
@@ -41,7 +41,7 @@ TEST(OrderCacheImpl02Test, ReturnsAllAddedOrders)
         {"o9", "s1", "sell", 100, "u1", "c1"},
     };
 
-    OrderCacheImpl02 cache;
+    OrderCache cache;
 
     for(const auto& order : added_orders)
     {
@@ -54,15 +54,15 @@ TEST(OrderCacheImpl02Test, ReturnsAllAddedOrders)
     EXPECT_EQ(added_orders, returned_orders);
 }
 
-TEST(OrderCacheImpl02Test, ReturnsNoOrderIfNoneAdded)
+TEST(OrderCacheTest, ReturnsNoOrderIfNoneAdded)
 {
-    OrderCacheImpl02 cache;
+    OrderCache cache;
     const auto returned_orders = cache.getAllOrders();
 
     EXPECT_TRUE(returned_orders.empty());
 }
 
-TEST(OrderCacheImpl02Test, CancelsOrders)
+TEST(OrderCacheTest, CancelsOrders)
 {
     const std::vector<Order> added_orders{
         {"o1", "s1", "sell", 100, "u1", "c1"},
@@ -84,7 +84,7 @@ TEST(OrderCacheImpl02Test, CancelsOrders)
         {"o9", "s1", "sell", 100, "u1", "c1"},
     };
 
-    OrderCacheImpl02 cache;
+    OrderCache cache;
 
     for(const auto& order : added_orders)
     {
@@ -102,7 +102,7 @@ TEST(OrderCacheImpl02Test, CancelsOrders)
     EXPECT_EQ(expected_orders, returned_orders);
 }
 
-TEST(OrderCacheImpl02Test, CancelsUserOrders)
+TEST(OrderCacheTest, CancelsUserOrders)
 {
     const std::vector<Order> added_orders{
         {"o1", "s1", "sell", 100, "u1", "c1"},
@@ -125,7 +125,7 @@ TEST(OrderCacheImpl02Test, CancelsUserOrders)
         {"o9", "s1", "sell", 100, "u3", "c1"},
     };
 
-    OrderCacheImpl02 cache;
+    OrderCache cache;
 
     for(const auto& order : added_orders)
     {
@@ -140,7 +140,7 @@ TEST(OrderCacheImpl02Test, CancelsUserOrders)
     EXPECT_EQ(expected_orders, returned_orders);
 }
 
-TEST(OrderCacheImpl02Test, CancelsSecurityOrdersWithMinQty)
+TEST(OrderCacheTest, CancelsSecurityOrdersWithMinQty)
 {
     const std::vector<Order> added_orders{
         {"o1", "s1", "sell", 300, "u1", "c1"},
@@ -164,7 +164,7 @@ TEST(OrderCacheImpl02Test, CancelsSecurityOrdersWithMinQty)
         {"o9", "s3", "sell", 400, "u3", "c1"},
     };
 
-    OrderCacheImpl02 cache;
+    OrderCache cache;
 
     for(const auto& order : added_orders)
     {
@@ -180,7 +180,7 @@ TEST(OrderCacheImpl02Test, CancelsSecurityOrdersWithMinQty)
     EXPECT_EQ(expected_orders, returned_orders);
 }
 
-TEST(OrderCacheImpl02Test, MatchesOrders)
+TEST(OrderCacheTest, MatchesOrders)
 {
     const std::vector<Order> added_orders{
         {"o1", "s1", "sell", 300, "u1", "c1"},
@@ -194,7 +194,7 @@ TEST(OrderCacheImpl02Test, MatchesOrders)
         {"o9", "s1", "buy" , 300, "u1", "c5"},
     };
 
-    OrderCacheImpl02 cache;
+    OrderCache cache;
 
     for(const auto& order : added_orders)
     {
@@ -206,7 +206,7 @@ TEST(OrderCacheImpl02Test, MatchesOrders)
     EXPECT_EQ(matched_amount, 900);
 }
 
-TEST(OrderCacheImpl02Test, MatchesOrders02)
+TEST(OrderCacheTest, MatchesOrders02)
 {
     const std::vector<Order> added_orders{
 
@@ -220,7 +220,7 @@ TEST(OrderCacheImpl02Test, MatchesOrders02)
         {"o5", "s1", "buy",  20, "u1", "a"},
     };
 
-    OrderCacheImpl02 cache;
+    OrderCache cache;
 
     for(const auto& order : added_orders)
     {
@@ -232,14 +232,14 @@ TEST(OrderCacheImpl02Test, MatchesOrders02)
     EXPECT_EQ(matched_amount, 345);
 }
 
-TEST(OrderCacheImpl02Test, MatchesOrders03)
+TEST(OrderCacheTest, MatchesOrders03)
 {
     const std::vector<Order> added_orders{
         {"o1", "s1", "buy" , 100, "u1", "a"},
         {"o2", "s1", "sell", 200, "u1", "a"},
     };
 
-    OrderCacheImpl02 cache;
+    OrderCache cache;
 
     for(const auto& order : added_orders)
     {
@@ -251,14 +251,14 @@ TEST(OrderCacheImpl02Test, MatchesOrders03)
     EXPECT_EQ(matched_amount, 0);
 }
 
-TEST(OrderCacheImpl02Test, MatchesOrders04)
+TEST(OrderCacheTest, MatchesOrders04)
 {
     const std::vector<Order> added_orders{
         {"o1", "s1", "buy", 100, "u1", "a"},
         {"o2", "s1", "buy", 200, "u1", "b"},
     };
 
-    OrderCacheImpl02 cache;
+    OrderCache cache;
 
     for(const auto& order : added_orders)
     {
@@ -270,14 +270,14 @@ TEST(OrderCacheImpl02Test, MatchesOrders04)
     EXPECT_EQ(matched_amount, 0);
 }
 
-TEST(OrderCacheImpl02Test, MatchesOrders05)
+TEST(OrderCacheTest, MatchesOrders05)
 {
     const std::vector<Order> added_orders{
         {"o1", "s1", "sell", 100, "u1", "a"},
         {"o2", "s1", "sell", 200, "u1", "b"},
     };
 
-    OrderCacheImpl02 cache;
+    OrderCache cache;
 
     for(const auto& order : added_orders)
     {

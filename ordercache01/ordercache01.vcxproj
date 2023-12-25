@@ -129,18 +129,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="OrderCacheImpl01.cpp" />
-    <ClCompile Include="OrderCacheImpl02.cpp" />
-    <ClCompile Include="OrderCacheImpl02Test.cpp" />
+    <ClCompile Include="OrderCache.cpp" />
+    <ClCompile Include="OrderCacheTest.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="IdOnlyOrder.h" />
-    <ClInclude Include="Order.h" />
-    <ClInclude Include="OrderCacheImpl01.h" />
-    <ClInclude Include="OrderCacheImpl02.h" />
+    <ClInclude Include="OrderCache.h" />
     <ClInclude Include="OrderCacheInterface.h" />
-    <ClInclude Include="OrderCompare.h" />
-    <ClInclude Include="OrderHash.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

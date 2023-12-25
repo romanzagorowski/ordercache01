@@ -1,11 +1,19 @@
-#include "OrderCacheImpl02.h"
-#include "IdOnlyOrder.h"
+#include "OrderCache.h"
 
 #include <algorithm>
 #include <set>
 #include <cassert>
 
-void OrderCacheImpl02::addOrder(Order order)
+class IdOnlyOrder : public Order
+{
+public:
+    explicit IdOnlyOrder(const std::string& orderId) :
+        Order{ orderId, "", "", 0, "", "" }
+    {
+    }
+};
+
+void OrderCache::addOrder(Order order)
 {
     if(const auto& [it, inserted] = order_uset.insert(order); inserted)
     {
@@ -43,7 +51,7 @@ void removeOrderFromIndex(
     }
 }
 
-void OrderCacheImpl02::cancelOrder(const std::string& orderId)
+void OrderCache::cancelOrder(const std::string& orderId)
 {
     // I need the iterator to the order to remove it from indexes...
     const auto it_order = order_uset.find(IdOnlyOrder{ orderId });
@@ -58,7 +66,7 @@ void OrderCacheImpl02::cancelOrder(const std::string& orderId)
     order_uset.erase(it_order);
 }
 
-void OrderCacheImpl02::cancelOrdersForUser(const std::string& user)
+void OrderCache::cancelOrdersForUser(const std::string& user)
 {
     // Remove user's orders from...
     for(const auto& it_order : user_order_map[user])
@@ -75,7 +83,7 @@ void OrderCacheImpl02::cancelOrdersForUser(const std::string& user)
     user_order_map.erase(user);
 }
 
-void OrderCacheImpl02::cancelOrdersForSecIdWithMinimumQty(const std::string& securityId, unsigned int minQty)
+void OrderCache::cancelOrdersForSecIdWithMinimumQty(const std::string& securityId, unsigned int minQty)
 {
     auto& security_orders = security_order_map[securityId]; // a reference to a collection of iterators to orders
 
@@ -126,7 +134,7 @@ bool operator > (
     return lhs.first->orderId() > rhs.first->orderId();
 }
 
-unsigned int OrderCacheImpl02::getMatchingSizeForSecurity(const std::string& securityId)
+unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityId)
 {
     unsigned int total_matched_qty = 0;
 
@@ -201,7 +209,7 @@ unsigned int OrderCacheImpl02::getMatchingSizeForSecurity(const std::string& sec
     return total_matched_qty;
 }
 
-std::vector<Order> OrderCacheImpl02::getAllOrders() const
+std::vector<Order> OrderCache::getAllOrders() const
 {
     return std::vector<Order>{ std::begin(order_uset), std::end(order_uset) };
 }

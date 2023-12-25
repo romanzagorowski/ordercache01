@@ -2,9 +2,29 @@
 
 #include "OrderCacheInterface.h"
 
-#include <unordered_map>
+#include <unordered_set>
+#include <map>
 
-class OrderCacheImpl01 : public OrderCacheInterface
+struct OrderCompare
+{
+    bool operator () (const Order& o1, const Order& o2) const
+    {
+        return o1.orderId() == o2.orderId();
+    }
+};
+
+struct OrderHash
+{
+    std::size_t operator () (const Order& o) const
+    {
+        return hash(o.orderId());
+    }
+
+private:
+    std::hash<std::string> hash;
+};
+
+class OrderCache : public OrderCacheInterface
 {
 public:
     // add order to the cache
@@ -26,5 +46,9 @@ public:
     std::vector<Order> getAllOrders() const override;
 
 private:
-    std::unordered_map<std::string, Order> order_umap;
+    std::unordered_set<Order, OrderHash, OrderCompare> order_uset;
+
+    std::map<std::string, std::vector<decltype(order_uset)::const_iterator>> security_order_map;
+    std::map<std::string, std::vector<decltype(order_uset)::const_iterator>>     user_order_map;
+    std::map<std::string, std::vector<decltype(order_uset)::const_iterator>>  company_order_map;
 };

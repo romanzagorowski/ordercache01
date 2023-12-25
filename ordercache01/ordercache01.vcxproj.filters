@@ -18,13 +18,16 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OrderCacheImpl01.cpp">
+    <ClCompile Include="OrderCache.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OrderCacheImpl02.cpp">
+    <ClCompile Include="OrderCacheTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OrderCacheImpl02Test.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\gtest\gtest-all.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\gmock\gmock-all.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,22 +35,7 @@
     <ClInclude Include="OrderCacheInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OrderCacheImpl01.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OrderCacheImpl02.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OrderCompare.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Order.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OrderHash.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IdOnlyOrder.h">
+    <ClInclude Include="OrderCache.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
