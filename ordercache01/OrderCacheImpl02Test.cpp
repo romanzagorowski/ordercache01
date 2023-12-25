@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <ostream>
+#include <algorithm>
 
 #include "OrderCacheImpl02.h"
 
@@ -19,6 +20,11 @@ std::ostream& operator << (std::ostream& os, const Order& o)
 bool operator == (const Order& o1, const Order& o2)
 {
     return o1.orderId() == o2.orderId();
+}
+
+bool operator < (const Order& o1, const Order& o2)
+{
+    return o1.orderId() < o2.orderId();
 }
 
 TEST(OrderCacheImpl02Test, ReturnsAllAddedOrders)
@@ -42,7 +48,8 @@ TEST(OrderCacheImpl02Test, ReturnsAllAddedOrders)
         cache.addOrder(order);
     }
 
-    const auto returned_orders = cache.getAllOrders();
+    auto returned_orders = cache.getAllOrders();
+    std::sort(std::begin(returned_orders), std::end(returned_orders));
 
     EXPECT_EQ(added_orders, returned_orders);
 }
@@ -89,7 +96,8 @@ TEST(OrderCacheImpl02Test, CancelsOrders)
     cache.cancelOrder("o6");
     cache.cancelOrder("o8");
 
-    const auto returned_orders = cache.getAllOrders();
+    auto returned_orders = cache.getAllOrders();
+    std::sort(std::begin(returned_orders), std::end(returned_orders));
 
     EXPECT_EQ(expected_orders, returned_orders);
 }
@@ -126,7 +134,8 @@ TEST(OrderCacheImpl02Test, CancelsUserOrders)
 
     cache.cancelOrdersForUser("u2");
 
-    const auto returned_orders = cache.getAllOrders();
+    auto returned_orders = cache.getAllOrders();
+    std::sort(std::begin(returned_orders), std::end(returned_orders));
 
     EXPECT_EQ(expected_orders, returned_orders);
 }
@@ -150,8 +159,8 @@ TEST(OrderCacheImpl02Test, CancelsSecurityOrdersWithMinQty)
         {"o2", "s2", "sell", 199, "u1", "c1"},
         {"o3", "s3", "sell", 100, "u1", "c1"},
         {"o4", "s1", "sell", 200, "u2", "c1"},
-        {"o7", "s3", "sell", 100, "u3", "c1"},
         {"o6", "s1", "sell", 300, "u2", "c1"},
+        {"o7", "s3", "sell", 100, "u3", "c1"},
         {"o9", "s3", "sell", 400, "u3", "c1"},
     };
 
@@ -164,7 +173,9 @@ TEST(OrderCacheImpl02Test, CancelsSecurityOrdersWithMinQty)
 
     cache.cancelOrdersForSecIdWithMinimumQty("s2", 200);
 
-    const auto returned_orders = cache.getAllOrders();
+    auto returned_orders = cache.getAllOrders();
+    std::sort(std::begin(returned_orders), std::end(returned_orders));
+
 
     EXPECT_EQ(expected_orders, returned_orders);
 }
