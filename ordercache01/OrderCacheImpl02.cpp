@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <set>
+#include <cassert>
 
 void OrderCacheImpl02::addOrder(Order order)
 {
@@ -110,20 +111,28 @@ void OrderCacheImpl02::cancelOrdersForSecIdWithMinimumQty(const std::string& sec
 }
 
 bool operator < (
-    const std::pair<std::unordered_set<Order>::iterator, unsigned int>& lhs,
-    const std::pair<std::unordered_set<Order>::iterator, unsigned int>& rhs
+    const std::pair<std::unordered_set<Order>::const_iterator, unsigned int>& lhs,
+    const std::pair<std::unordered_set<Order>::const_iterator, unsigned int>& rhs
     )
 {
     return lhs.first->orderId() < rhs.first->orderId();
+}
+
+bool operator > (
+    const std::pair<std::unordered_set<Order>::const_iterator, unsigned int>& lhs,
+    const std::pair<std::unordered_set<Order>::const_iterator, unsigned int>& rhs
+    )
+{
+    return lhs.first->orderId() > rhs.first->orderId();
 }
 
 unsigned int OrderCacheImpl02::getMatchingSizeForSecurity(const std::string& securityId)
 {
     unsigned int total_matched_qty = 0;
 
-    std::vector<std::pair<std::unordered_set<Order>::iterator, unsigned int>> sell_orders, buy_orders;
+    std::vector<std::pair<std::unordered_set<Order>::const_iterator, unsigned int>> sell_orders, buy_orders;
 
-    // TODO: Populate sell and buy orders vector.
+    // From security index extract sell and buy orders.
     for(auto& it_order : security_order_map[securityId])
     {
         if(it_order->side() == "sell")
@@ -136,61 +145,55 @@ unsigned int OrderCacheImpl02::getMatchingSizeForSecurity(const std::string& sec
         }
     }
 
-    // TODO: Sort one vector ascending and another descending.
-    std::sort(sell_orders.begin(), sell_orders.end());
-    std::sort(buy_orders.begin(), buy_orders.end());
+    // Sort sell orders ascending by order id.
+    std::sort(sell_orders.begin(), sell_orders.end(), std::less{});
+
+    // Sort buy orders descending by order id.
+    std::sort(buy_orders.begin(), buy_orders.end(), std::greater{});
 
     //---
 
-    for(auto&& it_sell_pair = sell_orders.begin(); it_sell_pair != sell_orders.end(); ++it_sell_pair)
+    for(auto& [sel_it_order, sell_qty_left] : sell_orders)
     {
-        auto& [it_sell_order, sell_qty_left] = *it_sell_pair;
-
-        for(auto&& it_buy_pair = buy_orders.rbegin(); it_buy_pair != buy_orders.rend(); ++it_buy_pair)
+        for(auto& [buy_it_order, buy_qty_left] : buy_orders)
         {
-            auto& [it_buy_order, buy_qty_left] = *it_buy_pair;
-
-            if(it_sell_order->company() != it_buy_order->company() && buy_qty_left != 0)
+            if(sel_it_order->company() == buy_it_order->company() || 0 == buy_qty_left)
             {
-                if(sell_qty_left > buy_qty_left)
-                {
-                    const unsigned int matched_qty = buy_qty_left;
+                continue; // continue to the next buy order
+            }
 
-                    total_matched_qty += matched_qty;
+            if(sell_qty_left > buy_qty_left)
+            {
+                const unsigned int matched_qty = buy_qty_left;
 
-                    sell_qty_left -= matched_qty;
-                    buy_qty_left = 0;
+                total_matched_qty += matched_qty;
 
-                    // buy_qty_left has been depleted
-                    // take the next buy_order
-                    continue;
-                }
-                else if(sell_qty_left < buy_qty_left)
-                {
-                    const unsigned int matched_qty = sell_qty_left;
+                sell_qty_left -= matched_qty;
+                buy_qty_left = 0;
 
-                    total_matched_qty += matched_qty;
+                continue; // continue to the next buy order
+            }
+            else if(sell_qty_left < buy_qty_left)
+            {
+                const unsigned int matched_qty = sell_qty_left;
 
-                    sell_qty_left = 0;
-                    buy_qty_left -= matched_qty;
+                total_matched_qty += matched_qty;
 
-                    // sell_qty_left has been depleted
-                    // take the next sell_order
-                    break;
-                }
-                else // sell_qty_left == buy_qty_left
-                {
-                    const unsigned int matched_qty = sell_qty_left;
+                sell_qty_left = 0;
+                buy_qty_left -= matched_qty;
 
-                    total_matched_qty += matched_qty;
+                break; // stop processing buy orders and continue to the next sell order
+            }
+            else if(sell_qty_left == buy_qty_left)
+            {
+                const unsigned int matched_qty = sell_qty_left;
 
-                    sell_qty_left = 0;
-                    buy_qty_left = 0;
+                total_matched_qty += matched_qty;
 
-                    // sell_qty_left has been depleted
-                    // take the next sell_order
-                    break;
-                }
+                sell_qty_left = 0;
+                buy_qty_left = 0;
+
+                break; // stop processing buy orders and continue to the next sell order
             }
         }
     }

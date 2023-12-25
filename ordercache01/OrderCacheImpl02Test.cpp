@@ -194,3 +194,48 @@ TEST(OrderCacheImpl02Test, MatchesOrders)
 
     EXPECT_EQ(matched_amount, 900);
 }
+
+TEST(OrderCacheImpl02Test, MatchesOrders02)
+{
+    const std::vector<Order> added_orders{
+
+        {"o1", "s1", "sell", 100, "u1", "a"},
+        {"o2", "s1", "sell", 150, "u1", "b"},
+        {"o3", "s1", "sell",  50, "u1", "c"},
+        {"o4", "s1", "sell",  75, "u1", "d"},
+
+        {"o7", "s1", "buy", 300, "u1", "c"},
+        {"o6", "s1", "buy",  25, "u1", "b"},
+        {"o5", "s1", "buy",  20, "u1", "a"},
+    };
+
+    OrderCacheImpl02 cache;
+
+    for(const auto& order : added_orders)
+    {
+        cache.addOrder(order);
+    }
+
+    const auto matched_amount = cache.getMatchingSizeForSecurity("s1");
+
+    EXPECT_EQ(matched_amount, 345);
+}
+
+TEST(OrderCacheImpl02Test, MatchesOrders03)
+{
+    const std::vector<Order> added_orders{
+        {"o1", "s1", "buy" , 100, "u1", "a"},
+        {"o2", "s1", "sell", 200, "u1", "a"},
+    };
+
+    OrderCacheImpl02 cache;
+
+    for(const auto& order : added_orders)
+    {
+        cache.addOrder(order);
+    }
+
+    const auto matched_amount = cache.getMatchingSizeForSecurity("s1");
+
+    EXPECT_EQ(matched_amount, 0);
+}
