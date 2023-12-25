@@ -15,25 +15,21 @@ public:
 
 void OrderCache::addOrder(Order order)
 {
-    if(const auto& [it, inserted] = order_uset.insert(order); inserted)
+    if(const auto& [it, inserted] = orders_table.insert(order); inserted)
     {
-        security_order_map[it->securityId()].push_back(it);
-        user_order_map[it->user()].push_back(it);
-        company_order_map[it->company()].push_back(it);
+        security_index[it->securityId()].push_back(it);
+        user_index[it->user()].push_back(it);
+        company_index[it->company()].push_back(it);
     }
 }
 
-static
-void removeOrderFromIndex(
-    std::map<std::string, std::vector<std::unordered_set<Order>::const_iterator>>& index,
-    std::unordered_set<Order>::const_iterator it_order
-)
+void OrderCache::removeOrderFromIndex(IndexType& index, OrderIterator it_order)
 {
     auto it_key_orders = index.begin();
 
     while(it_key_orders != index.end())
     {
-        auto& [user, orders] = *it_key_orders;
+        auto& [key, orders] = *it_key_orders;
 
         if(auto it_found = std::find(orders.begin(), orders.end(), it_order); it_found != orders.end())
         {
@@ -54,38 +50,38 @@ void removeOrderFromIndex(
 void OrderCache::cancelOrder(const std::string& orderId)
 {
     // I need the iterator to the order to remove it from indexes...
-    const auto it_order = order_uset.find(IdOnlyOrder{ orderId });
+    const auto it_order = orders_table.find(IdOnlyOrder{ orderId }); // an ugly hack but works...
 
-    if(it_order != order_uset.end())
+    if(it_order != orders_table.end())
     {
-        removeOrderFromIndex(user_order_map, it_order);
-        removeOrderFromIndex(security_order_map, it_order);
-        removeOrderFromIndex(company_order_map, it_order);
+        removeOrderFromIndex(user_index, it_order);
+        removeOrderFromIndex(security_index, it_order);
+        removeOrderFromIndex(company_index, it_order);
     }
 
-    order_uset.erase(it_order);
+    orders_table.erase(it_order);
 }
 
 void OrderCache::cancelOrdersForUser(const std::string& user)
 {
     // Remove user's orders from...
-    for(const auto& it_order : user_order_map[user])
+    for(const auto& it_order : user_index[user])
     {
         // ...other indexes.
-        removeOrderFromIndex(security_order_map, it_order);
-        removeOrderFromIndex(company_order_map, it_order);
+        removeOrderFromIndex(security_index, it_order);
+        removeOrderFromIndex(company_index, it_order);
 
         // ...orders table.
-        order_uset.erase(it_order);
+        orders_table.erase(it_order);
     }
 
     // Remove user and its orders from the index.
-    user_order_map.erase(user);
+    user_index.erase(user);
 }
 
 void OrderCache::cancelOrdersForSecIdWithMinimumQty(const std::string& securityId, unsigned int minQty)
 {
-    auto& security_orders = security_order_map[securityId]; // a reference to a collection of iterators to orders
+    auto& security_orders = security_index[securityId]; // a reference to a collection of iterators to orders
 
     auto it_it_order = security_orders.begin();
 
@@ -96,14 +92,14 @@ void OrderCache::cancelOrdersForSecIdWithMinimumQty(const std::string& securityI
         if(it_order->qty() >= minQty)
         {
             // Remove order from other indexes.
-            removeOrderFromIndex(user_order_map, it_order);
-            removeOrderFromIndex(company_order_map, it_order);
+            removeOrderFromIndex(user_index, it_order);
+            removeOrderFromIndex(company_index, it_order);
 
             // Remove the order from the security index itself.
             it_it_order = security_orders.erase(it_it_order);
 
             // Remove the order from the orders table.
-            this->order_uset.erase(it_order);
+            this->orders_table.erase(it_order);
         }
         else
         {
@@ -114,24 +110,8 @@ void OrderCache::cancelOrdersForSecIdWithMinimumQty(const std::string& securityI
     // If all orders for security has been removed - remove the security from the index.
     if(security_orders.empty())
     {
-        security_order_map.erase(securityId);
+        security_index.erase(securityId);
     }
-}
-
-bool operator < (
-    const std::pair<std::unordered_set<Order>::const_iterator, unsigned int>& lhs,
-    const std::pair<std::unordered_set<Order>::const_iterator, unsigned int>& rhs
-    )
-{
-    return lhs.first->orderId() < rhs.first->orderId();
-}
-
-bool operator > (
-    const std::pair<std::unordered_set<Order>::const_iterator, unsigned int>& lhs,
-    const std::pair<std::unordered_set<Order>::const_iterator, unsigned int>& rhs
-    )
-{
-    return lhs.first->orderId() > rhs.first->orderId();
 }
 
 unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityId)
@@ -140,8 +120,10 @@ unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityI
 
     std::vector<std::pair<std::unordered_set<Order>::const_iterator, unsigned int>> sell_orders, buy_orders;
 
-    // From security index extract sell and buy orders.
-    for(auto& it_order : security_order_map[securityId])
+    // From security index select sell and buy orders
+    // and attach 'remaining qty' field to each order,
+    // initialized by the order's qty.
+    for(auto& it_order : security_index[securityId])
     {
         if(it_order->side() == "sell")
         {
@@ -153,53 +135,49 @@ unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityI
         }
     }
 
-    // Sort sell orders ascending by order id.
-    std::sort(sell_orders.begin(), sell_orders.end(), std::less{});
-
-    // Sort buy orders descending by order id.
-    std::sort(buy_orders.begin(), buy_orders.end(), std::greater{});
-
     //---
 
-    for(auto& [sel_it_order, sell_qty_left] : sell_orders)
+    for(auto& [sel_it_order, sell_remaining_qty] : sell_orders)
     {
-        for(auto& [buy_it_order, buy_qty_left] : buy_orders)
+        for(auto& [buy_it_order, buy_remaining_qty] : buy_orders)
         {
-            if(sel_it_order->company() == buy_it_order->company() || 0 == buy_qty_left)
+            // Do not match orders from the same company.
+            // Skip already fully matched orders.
+            if(sel_it_order->company() == buy_it_order->company() || 0 == buy_remaining_qty)
             {
                 continue; // continue to the next buy order
             }
 
-            if(sell_qty_left > buy_qty_left)
+            if(sell_remaining_qty > buy_remaining_qty)
             {
-                const unsigned int matched_qty = buy_qty_left;
+                const unsigned int matched_qty = buy_remaining_qty;
 
                 total_matched_qty += matched_qty;
 
-                sell_qty_left -= matched_qty;
-                buy_qty_left = 0;
+                sell_remaining_qty -= matched_qty;
+                buy_remaining_qty = 0;
 
                 continue; // continue to the next buy order
             }
-            else if(sell_qty_left < buy_qty_left)
+            else if(sell_remaining_qty < buy_remaining_qty)
             {
-                const unsigned int matched_qty = sell_qty_left;
+                const unsigned int matched_qty = sell_remaining_qty;
 
                 total_matched_qty += matched_qty;
 
-                sell_qty_left = 0;
-                buy_qty_left -= matched_qty;
+                sell_remaining_qty = 0;
+                buy_remaining_qty -= matched_qty;
 
                 break; // stop processing buy orders and continue to the next sell order
             }
-            else if(sell_qty_left == buy_qty_left)
+            else if(sell_remaining_qty == buy_remaining_qty)
             {
-                const unsigned int matched_qty = sell_qty_left;
+                const unsigned int matched_qty = sell_remaining_qty;
 
                 total_matched_qty += matched_qty;
 
-                sell_qty_left = 0;
-                buy_qty_left = 0;
+                sell_remaining_qty = 0;
+                buy_remaining_qty = 0;
 
                 break; // stop processing buy orders and continue to the next sell order
             }
@@ -211,5 +189,5 @@ unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityI
 
 std::vector<Order> OrderCache::getAllOrders() const
 {
-    return std::vector<Order>{ std::begin(order_uset), std::end(order_uset) };
+    return std::vector<Order>{ std::begin(orders_table), std::end(orders_table) };
 }

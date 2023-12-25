@@ -5,6 +5,7 @@
 #include <unordered_set>
 #include <map>
 
+// Compare orders by comparing their ids.
 struct OrderCompare
 {
     bool operator () (const Order& o1, const Order& o2) const
@@ -13,6 +14,7 @@ struct OrderCompare
     }
 };
 
+// Hash an order by hashing its id.
 struct OrderHash
 {
     std::size_t operator () (const Order& o) const
@@ -46,9 +48,20 @@ public:
     std::vector<Order> getAllOrders() const override;
 
 private:
-    std::unordered_set<Order, OrderHash, OrderCompare> order_uset;
+    using OrdersTableType = std::unordered_set<Order, OrderHash, OrderCompare>;
+    using OrderIterator = OrdersTableType::const_iterator;
+    using IndexType = std::map<std::string, std::vector<OrderIterator>>;
 
-    std::map<std::string, std::vector<decltype(order_uset)::const_iterator>> security_order_map;
-    std::map<std::string, std::vector<decltype(order_uset)::const_iterator>>     user_order_map;
-    std::map<std::string, std::vector<decltype(order_uset)::const_iterator>>  company_order_map;
+private:
+    OrdersTableType orders_table;
+
+    IndexType security_index;
+    IndexType     user_index;
+    IndexType  company_index;
+
+private:
+    static void removeOrderFromIndex(
+        IndexType& index,
+        OrderIterator it_order
+    );
 };
