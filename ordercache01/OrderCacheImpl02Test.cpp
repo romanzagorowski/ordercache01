@@ -250,3 +250,41 @@ TEST(OrderCacheImpl02Test, MatchesOrders03)
 
     EXPECT_EQ(matched_amount, 0);
 }
+
+TEST(OrderCacheImpl02Test, MatchesOrders04)
+{
+    const std::vector<Order> added_orders{
+        {"o1", "s1", "buy", 100, "u1", "a"},
+        {"o2", "s1", "buy", 200, "u1", "b"},
+    };
+
+    OrderCacheImpl02 cache;
+
+    for(const auto& order : added_orders)
+    {
+        cache.addOrder(order);
+    }
+
+    const auto matched_amount = cache.getMatchingSizeForSecurity("s1");
+
+    EXPECT_EQ(matched_amount, 0);
+}
+
+TEST(OrderCacheImpl02Test, MatchesOrders05)
+{
+    const std::vector<Order> added_orders{
+        {"o1", "s1", "sell", 100, "u1", "a"},
+        {"o2", "s1", "sell", 200, "u1", "b"},
+    };
+
+    OrderCacheImpl02 cache;
+
+    for(const auto& order : added_orders)
+    {
+        cache.addOrder(order);
+    }
+
+    const auto matched_amount = cache.getMatchingSizeForSecurity("s1");
+
+    EXPECT_EQ(matched_amount, 0);
+}
