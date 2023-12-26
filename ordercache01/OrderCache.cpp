@@ -15,102 +15,90 @@ public:
 
 void OrderCache::addOrder(Order order)
 {
-    if(const auto& [it, inserted] = orders_table.insert(order); inserted)
+    if(const auto& [it_order, inserted] = orders_table.insert(order); inserted)
     {
-        security_index[it->securityId()].push_back(it);
-        user_index[it->user()].push_back(it);
-        company_index[it->company()].push_back(it);
+        addOrderToIndex(security_index, it_order->securityId(), it_order);
+        addOrderToIndex(user_index, it_order->user(), it_order);
+        addOrderToIndex(company_index, it_order->company(), it_order);
     }
 }
 
-void OrderCache::removeOrderFromIndex(IndexType& index, OrderIterator it_order)
+void OrderCache::addOrderToIndex(IndexType& index, const std::string& key, const OrderIterator& it_order)
 {
-    auto it_key_orders = index.begin();
+    index.insert(std::make_pair(key, it_order));
+}
 
-    while(it_key_orders != index.end())
+void OrderCache::removeOrderFromIndex(IndexType& index, const OrderIterator& it_order)
+{
+    auto it = index.begin(); 
+    
+    while(it != index.end())
     {
-        auto& [key, orders] = *it_key_orders;
-
-        if(auto it_found = std::find(orders.begin(), orders.end(), it_order); it_found != orders.end())
+        if(it->second == it_order)
         {
-            orders.erase(it_found);
-        }
-
-        if(orders.empty())
-        {
-            it_key_orders = index.erase(it_key_orders);
+            it = index.erase(it);
         }
         else
         {
-            it_key_orders = std::next(it_key_orders);
+            it = std::next(it);
         }
     }
 }
 
 void OrderCache::cancelOrder(const std::string& orderId)
 {
-    // I need the iterator to the order to remove it from indexes...
-    const auto it_order = orders_table.find(IdOnlyOrder{ orderId }); // an ugly hack but works...
+    const auto it_order = orders_table.find(IdOnlyOrder{ orderId });
 
     if(it_order != orders_table.end())
     {
         removeOrderFromIndex(user_index, it_order);
         removeOrderFromIndex(security_index, it_order);
         removeOrderFromIndex(company_index, it_order);
-    }
 
-    orders_table.erase(it_order);
+        orders_table.erase(it_order);
+    }
 }
 
 void OrderCache::cancelOrdersForUser(const std::string& user)
 {
-    // Remove user's orders from...
-    for(const auto& it_order : user_index[user])
+    auto [range_begin, range_end] = user_index.equal_range(user);
+
+    for(auto& it = range_begin; it != range_end; ++it)
     {
-        // ...other indexes.
+        auto& [key, it_order] = *it;
+
         removeOrderFromIndex(security_index, it_order);
         removeOrderFromIndex(company_index, it_order);
 
-        // ...orders table.
         orders_table.erase(it_order);
     }
 
-    // Remove user and its orders from the index.
     user_index.erase(user);
 }
 
 void OrderCache::cancelOrdersForSecIdWithMinimumQty(const std::string& securityId, unsigned int minQty)
 {
-    auto& security_orders = security_index[securityId]; // a reference to a collection of iterators to orders
+    auto [range_begin, range_end] = security_index.equal_range(securityId);
 
-    auto it_it_order = security_orders.begin();
+    auto& it = range_begin;
 
-    while(it_it_order != security_orders.end())
+    while(it != range_end)
     {
-        auto it_order = *it_it_order;
+        auto& [key, it_order] = *it;
 
         if(it_order->qty() >= minQty)
         {
-            // Remove order from other indexes.
             removeOrderFromIndex(user_index, it_order);
             removeOrderFromIndex(company_index, it_order);
 
-            // Remove the order from the security index itself.
-            it_it_order = security_orders.erase(it_it_order);
+            orders_table.erase(it_order);
 
-            // Remove the order from the orders table.
-            this->orders_table.erase(it_order);
+            it = security_index.erase(it);
         }
         else
         {
-            it_it_order = std::next(it_it_order);
+            it = std::next(it);
         }
-    }
-
-    // If all orders for security has been removed - remove the security from the index.
-    if(security_orders.empty())
-    {
-        security_index.erase(securityId);
     }
 }
 
@@ -120,11 +108,14 @@ unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityI
 
     std::vector<std::pair<std::unordered_set<Order>::const_iterator, unsigned int>> sell_orders, buy_orders;
 
-    // From security index select sell and buy orders
-    // and attach 'remaining qty' field to each order,
-    // initialized by the order's qty.
-    for(auto& it_order : security_index[securityId])
+    // Select all 'sell' and 'buy' orders for the given security
+    // and attach 'remaining qty' field to each of it (initialized by the order's qty).
+    auto [range_begin, range_end] = security_index.equal_range(securityId);
+
+    for(auto it = range_begin; it != range_end; ++it)
     {
+        const auto& [key, it_order] = *it;
+
         if(it_order->side() == "sell")
         {
             sell_orders.push_back(std::make_pair(it_order, it_order->qty()));

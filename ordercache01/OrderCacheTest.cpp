@@ -309,3 +309,87 @@ TEST(OrderCacheTest, MatchesOrders06)
 
     EXPECT_EQ(matched_amount, 300);
 }
+
+TEST(OrderCacheTest, CancelsNotAddedOrder)
+{
+    const std::vector<Order> added_orders{
+        {"o1", "s1", "buy", 100, "u1", "a"},
+        {"o2", "s1", "buy", 200, "u1", "b"},
+        {"o3", "s1", "sell", 200, "u1", "a"},
+        {"o4", "s1", "sell", 100, "u1", "b"},
+    };
+
+    OrderCache cache;
+
+    for(const auto& order : added_orders)
+    {
+        cache.addOrder(order);
+    }
+
+    cache.cancelOrder("o9999");
+
+    auto returned_orders = cache.getAllOrders();
+    std::sort(std::begin(returned_orders), std::end(returned_orders));
+
+    EXPECT_EQ(added_orders, returned_orders);
+}
+
+TEST(OrderCacheTest, HandlesAddingTheSameOrderTwice)
+{
+    const std::vector<Order> added_orders{
+        {"o1", "s1", "buy", 100, "u1", "a"},
+        {"o2", "s1", "buy", 200, "u1", "b"},
+        {"o3", "s1", "sell", 200, "u1", "a"},
+        {"o4", "s1", "sell", 100, "u1", "b"},
+        {"o1", "s1", "buy", 100, "u1", "a"},
+    };
+
+    const std::vector<Order> expected_orders{
+        {"o1", "s1", "buy", 100, "u1", "a"},
+        {"o2", "s1", "buy", 200, "u1", "b"},
+        {"o3", "s1", "sell", 200, "u1", "a"},
+        {"o4", "s1", "sell", 100, "u1", "b"},
+    };
+
+    OrderCache cache;
+
+    for(const auto& order : added_orders)
+    {
+        cache.addOrder(order);
+    }
+
+    auto returned_orders = cache.getAllOrders();
+    std::sort(std::begin(returned_orders), std::end(returned_orders));
+
+    EXPECT_EQ(expected_orders, returned_orders);
+}
+
+TEST(OrderCacheTest, HandlesAddingOrderWithTheSameIdTwice)
+{
+    const std::vector<Order> added_orders{
+        {"o1", "s1", "buy", 100, "u1", "a"},
+        {"o2", "s1", "buy", 200, "u1", "b"},
+        {"o3", "s1", "sell", 200, "u1", "a"},
+        {"o4", "s1", "sell", 100, "u1", "b"},
+        {"o1", "s7", "buy", 700, "u7", "f"},
+    };
+
+    const std::vector<Order> expected_orders{
+        {"o1", "s1", "buy", 100, "u1", "a"},
+        {"o2", "s1", "buy", 200, "u1", "b"},
+        {"o3", "s1", "sell", 200, "u1", "a"},
+        {"o4", "s1", "sell", 100, "u1", "b"},
+    };
+
+    OrderCache cache;
+
+    for(const auto& order : added_orders)
+    {
+        cache.addOrder(order);
+    }
+
+    auto returned_orders = cache.getAllOrders();
+    std::sort(std::begin(returned_orders), std::end(returned_orders));
+
+    EXPECT_EQ(expected_orders, returned_orders);
+}

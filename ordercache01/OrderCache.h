@@ -50,7 +50,7 @@ public:
 private:
     using OrdersTableType = std::unordered_set<Order, OrderHash, OrderCompare>;
     using OrderIterator = OrdersTableType::const_iterator;
-    using IndexType = std::map<std::string, std::vector<OrderIterator>>;
+    using IndexType = std::multimap<std::string, OrderIterator>;
 
 private:
     OrdersTableType orders_table;
@@ -60,8 +60,14 @@ private:
     IndexType  company_index;
 
 private:
+    static void addOrderToIndex(
+        IndexType& index,
+        const std::string& key,
+        const OrderIterator& it_order
+    );
+
     static void removeOrderFromIndex(
         IndexType& index,
-        OrderIterator it_order
+        const OrderIterator& it_order
     );
 };

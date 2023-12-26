@@ -1,8 +1,8 @@
 1. DONE. OrderHasher and OrderComparer with noexcept.
 2. Matching method optimization:
 	* Iterator with filter (???). We dont copy elements from a collection. Just iterate skipping some elements (filtering out).
-	* A list? Easy depleted elements removal. Less elements to iterate over.
+	* A list? Easy depleted elements removal. Less elements to iterate over. DONE we skip 0 or the same company
 3. An index optimization:
-	* References instead of string copies?
+	* References instead of string copies? DONE no. Order returns copies not const references
 	* Some other collection than vector?
-
+4. removeOrderFromIndex(IndexType & index, OrderIterator it_order) or maybe OrderIterator & ??? DONE &
