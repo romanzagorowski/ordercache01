@@ -30,15 +30,15 @@ bool operator < (const Order& o1, const Order& o2)
 TEST(OrderCacheTest, ReturnsAllAddedOrders)
 {
     const std::vector<Order> added_orders{
-        {"o1", "s1", "sell", 100, "u1", "c1"},
-        {"o2", "s1", "sell", 100, "u1", "c1"},
-        {"o3", "s1", "sell", 100, "u1", "c1"},
-        {"o4", "s1", "sell", 100, "u1", "c1"},
-        {"o5", "s1", "sell", 100, "u1", "c1"},
-        {"o6", "s1", "sell", 100, "u1", "c1"},
-        {"o7", "s1", "sell", 100, "u1", "c1"},
-        {"o8", "s1", "sell", 100, "u1", "c1"},
-        {"o9", "s1", "sell", 100, "u1", "c1"},
+        {"o1", "s1", "Sell", 100, "u1", "c1"},
+        {"o2", "s1", "Sell", 100, "u1", "c1"},
+        {"o3", "s1", "Sell", 100, "u1", "c1"},
+        {"o4", "s1", "Sell", 100, "u1", "c1"},
+        {"o5", "s1", "Sell", 100, "u1", "c1"},
+        {"o6", "s1", "Sell", 100, "u1", "c1"},
+        {"o7", "s1", "Sell", 100, "u1", "c1"},
+        {"o8", "s1", "Sell", 100, "u1", "c1"},
+        {"o9", "s1", "Sell", 100, "u1", "c1"},
     };
 
     OrderCache cache;
@@ -65,23 +65,23 @@ TEST(OrderCacheTest, ReturnsNoOrderIfNoneAdded)
 TEST(OrderCacheTest, CancelsOrders)
 {
     const std::vector<Order> added_orders{
-        {"o1", "s1", "sell", 100, "u1", "c1"},
-        {"o2", "s1", "sell", 100, "u1", "c1"},
-        {"o3", "s1", "sell", 100, "u1", "c1"},
-        {"o4", "s1", "sell", 100, "u1", "c1"},
-        {"o5", "s1", "sell", 100, "u1", "c1"},
-        {"o6", "s1", "sell", 100, "u1", "c1"},
-        {"o7", "s1", "sell", 100, "u1", "c1"},
-        {"o8", "s1", "sell", 100, "u1", "c1"},
-        {"o9", "s1", "sell", 100, "u1", "c1"},
+        {"o1", "s1", "Sell", 100, "u1", "c1"},
+        {"o2", "s1", "Sell", 100, "u1", "c1"},
+        {"o3", "s1", "Sell", 100, "u1", "c1"},
+        {"o4", "s1", "Sell", 100, "u1", "c1"},
+        {"o5", "s1", "Sell", 100, "u1", "c1"},
+        {"o6", "s1", "Sell", 100, "u1", "c1"},
+        {"o7", "s1", "Sell", 100, "u1", "c1"},
+        {"o8", "s1", "Sell", 100, "u1", "c1"},
+        {"o9", "s1", "Sell", 100, "u1", "c1"},
     };
 
     const std::vector<Order> expected_orders{
-        {"o1", "s1", "sell", 100, "u1", "c1"},
-        {"o3", "s1", "sell", 100, "u1", "c1"},
-        {"o5", "s1", "sell", 100, "u1", "c1"},
-        {"o7", "s1", "sell", 100, "u1", "c1"},
-        {"o9", "s1", "sell", 100, "u1", "c1"},
+        {"o1", "s1", "Sell", 100, "u1", "c1"},
+        {"o3", "s1", "Sell", 100, "u1", "c1"},
+        {"o5", "s1", "Sell", 100, "u1", "c1"},
+        {"o7", "s1", "Sell", 100, "u1", "c1"},
+        {"o9", "s1", "Sell", 100, "u1", "c1"},
     };
 
     OrderCache cache;
@@ -105,24 +105,24 @@ TEST(OrderCacheTest, CancelsOrders)
 TEST(OrderCacheTest, CancelsUserOrders)
 {
     const std::vector<Order> added_orders{
-        {"o1", "s1", "sell", 100, "u1", "c1"},
-        {"o2", "s1", "sell", 100, "u1", "c1"},
-        {"o3", "s1", "sell", 100, "u1", "c1"},
-        {"o4", "s1", "sell", 100, "u2", "c1"},
-        {"o5", "s1", "sell", 100, "u2", "c1"},
-        {"o7", "s1", "sell", 100, "u3", "c1"},
-        {"o6", "s1", "sell", 100, "u2", "c1"},
-        {"o8", "s1", "sell", 100, "u3", "c1"},
-        {"o9", "s1", "sell", 100, "u3", "c1"},
+        {"o1", "s1", "Sell", 100, "u1", "c1"},
+        {"o2", "s1", "Sell", 100, "u1", "c1"},
+        {"o3", "s1", "Sell", 100, "u1", "c1"},
+        {"o4", "s1", "Sell", 100, "u2", "c1"},
+        {"o5", "s1", "Sell", 100, "u2", "c1"},
+        {"o7", "s1", "Sell", 100, "u3", "c1"},
+        {"o6", "s1", "Sell", 100, "u2", "c1"},
+        {"o8", "s1", "Sell", 100, "u3", "c1"},
+        {"o9", "s1", "Sell", 100, "u3", "c1"},
     };
 
     const std::vector<Order> expected_orders{
-        {"o1", "s1", "sell", 100, "u1", "c1"},
-        {"o2", "s1", "sell", 100, "u1", "c1"},
-        {"o3", "s1", "sell", 100, "u1", "c1"},
-        {"o7", "s1", "sell", 100, "u3", "c1"},
-        {"o8", "s1", "sell", 100, "u3", "c1"},
-        {"o9", "s1", "sell", 100, "u3", "c1"},
+        {"o1", "s1", "Sell", 100, "u1", "c1"},
+        {"o2", "s1", "Sell", 100, "u1", "c1"},
+        {"o3", "s1", "Sell", 100, "u1", "c1"},
+        {"o7", "s1", "Sell", 100, "u3", "c1"},
+        {"o8", "s1", "Sell", 100, "u3", "c1"},
+        {"o9", "s1", "Sell", 100, "u3", "c1"},
     };
 
     OrderCache cache;
@@ -143,25 +143,25 @@ TEST(OrderCacheTest, CancelsUserOrders)
 TEST(OrderCacheTest, CancelsSecurityOrdersWithMinQty)
 {
     const std::vector<Order> added_orders{
-        {"o1", "s1", "sell", 300, "u1", "c1"},
-        {"o2", "s2", "sell", 199, "u1", "c1"},
-        {"o3", "s3", "sell", 100, "u1", "c1"},
-        {"o4", "s1", "sell", 200, "u2", "c1"},
-        {"o5", "s2", "sell", 200, "u2", "c1"},
-        {"o7", "s3", "sell", 100, "u3", "c1"},
-        {"o6", "s1", "sell", 300, "u2", "c1"},
-        {"o8", "s2", "sell", 300, "u3", "c1"},
-        {"o9", "s3", "sell", 400, "u3", "c1"},
+        {"o1", "s1", "Sell", 300, "u1", "c1"},
+        {"o2", "s2", "Sell", 199, "u1", "c1"},
+        {"o3", "s3", "Sell", 100, "u1", "c1"},
+        {"o4", "s1", "Sell", 200, "u2", "c1"},
+        {"o5", "s2", "Sell", 200, "u2", "c1"},
+        {"o7", "s3", "Sell", 100, "u3", "c1"},
+        {"o6", "s1", "Sell", 300, "u2", "c1"},
+        {"o8", "s2", "Sell", 300, "u3", "c1"},
+        {"o9", "s3", "Sell", 400, "u3", "c1"},
     };
 
     const std::vector<Order> expected_orders{
-        {"o1", "s1", "sell", 300, "u1", "c1"},
-        {"o2", "s2", "sell", 199, "u1", "c1"},
-        {"o3", "s3", "sell", 100, "u1", "c1"},
-        {"o4", "s1", "sell", 200, "u2", "c1"},
-        {"o6", "s1", "sell", 300, "u2", "c1"},
-        {"o7", "s3", "sell", 100, "u3", "c1"},
-        {"o9", "s3", "sell", 400, "u3", "c1"},
+        {"o1", "s1", "Sell", 300, "u1", "c1"},
+        {"o2", "s2", "Sell", 199, "u1", "c1"},
+        {"o3", "s3", "Sell", 100, "u1", "c1"},
+        {"o4", "s1", "Sell", 200, "u2", "c1"},
+        {"o6", "s1", "Sell", 300, "u2", "c1"},
+        {"o7", "s3", "Sell", 100, "u3", "c1"},
+        {"o9", "s3", "Sell", 400, "u3", "c1"},
     };
 
     OrderCache cache;
@@ -183,15 +183,15 @@ TEST(OrderCacheTest, CancelsSecurityOrdersWithMinQty)
 TEST(OrderCacheTest, MatchesOrders)
 {
     const std::vector<Order> added_orders{
-        {"o1", "s1", "sell", 300, "u1", "c1"},
-        {"o2", "s1", "sell", 200, "u1", "c2"},
-        {"o3", "s1", "sell", 100, "u1", "c3"},
-        {"o4", "s1", "sell", 400, "u1", "c4"},
-        {"o5", "s1", "buy" , 100, "u1", "c1"},
-        {"o6", "s1", "buy" , 200, "u1", "c2"},
-        {"o7", "s1", "buy" , 200, "u1", "c3"},
-        {"o8", "s1", "buy" , 100, "u1", "c4"},
-        {"o9", "s1", "buy" , 300, "u1", "c5"},
+        {"o1", "s1", "Sell", 300, "u1", "c1"},
+        {"o2", "s1", "Sell", 200, "u1", "c2"},
+        {"o3", "s1", "Sell", 100, "u1", "c3"},
+        {"o4", "s1", "Sell", 400, "u1", "c4"},
+        {"o5", "s1", "Buy" , 100, "u1", "c1"},
+        {"o6", "s1", "Buy" , 200, "u1", "c2"},
+        {"o7", "s1", "Buy" , 200, "u1", "c3"},
+        {"o8", "s1", "Buy" , 100, "u1", "c4"},
+        {"o9", "s1", "Buy" , 300, "u1", "c5"},
     };
 
     OrderCache cache;
@@ -210,14 +210,14 @@ TEST(OrderCacheTest, MatchesOrders02)
 {
     const std::vector<Order> added_orders{
 
-        {"o1", "s1", "sell", 100, "u1", "a"},
-        {"o2", "s1", "sell", 150, "u1", "b"},
-        {"o3", "s1", "sell",  50, "u1", "c"},
-        {"o4", "s1", "sell",  75, "u1", "d"},
+        {"o1", "s1", "Sell", 100, "u1", "a"},
+        {"o2", "s1", "Sell", 150, "u1", "b"},
+        {"o3", "s1", "Sell",  50, "u1", "c"},
+        {"o4", "s1", "Sell",  75, "u1", "d"},
 
-        {"o7", "s1", "buy", 300, "u1", "c"},
-        {"o6", "s1", "buy",  25, "u1", "b"},
-        {"o5", "s1", "buy",  20, "u1", "a"},
+        {"o7", "s1", "Buy", 300, "u1", "c"},
+        {"o6", "s1", "Buy",  25, "u1", "b"},
+        {"o5", "s1", "Buy",  20, "u1", "a"},
     };
 
     OrderCache cache;
@@ -235,8 +235,8 @@ TEST(OrderCacheTest, MatchesOrders02)
 TEST(OrderCacheTest, MatchesOrders03)
 {
     const std::vector<Order> added_orders{
-        {"o1", "s1", "buy" , 100, "u1", "a"},
-        {"o2", "s1", "sell", 200, "u1", "a"},
+        {"o1", "s1", "Buy" , 100, "u1", "a"},
+        {"o2", "s1", "Sell", 200, "u1", "a"},
     };
 
     OrderCache cache;
@@ -254,8 +254,8 @@ TEST(OrderCacheTest, MatchesOrders03)
 TEST(OrderCacheTest, MatchesOrders04)
 {
     const std::vector<Order> added_orders{
-        {"o1", "s1", "buy", 100, "u1", "a"},
-        {"o2", "s1", "buy", 200, "u1", "b"},
+        {"o1", "s1", "Buy", 100, "u1", "a"},
+        {"o2", "s1", "Buy", 200, "u1", "b"},
     };
 
     OrderCache cache;
@@ -273,8 +273,8 @@ TEST(OrderCacheTest, MatchesOrders04)
 TEST(OrderCacheTest, MatchesOrders05)
 {
     const std::vector<Order> added_orders{
-        {"o1", "s1", "sell", 100, "u1", "a"},
-        {"o2", "s1", "sell", 200, "u1", "b"},
+        {"o1", "s1", "Sell", 100, "u1", "a"},
+        {"o2", "s1", "Sell", 200, "u1", "b"},
     };
 
     OrderCache cache;
@@ -292,10 +292,10 @@ TEST(OrderCacheTest, MatchesOrders05)
 TEST(OrderCacheTest, MatchesOrders06)
 {
     const std::vector<Order> added_orders{
-        {"o1", "s1", "buy", 100, "u1", "a"},
-        {"o2", "s1", "buy", 200, "u1", "b"},
-        {"o3", "s1", "sell", 200, "u1", "a"},
-        {"o4", "s1", "sell", 100, "u1", "b"},
+        {"o1", "s1", "Buy", 100, "u1", "a"},
+        {"o2", "s1", "Buy", 200, "u1", "b"},
+        {"o3", "s1", "Sell", 200, "u1", "a"},
+        {"o4", "s1", "Sell", 100, "u1", "b"},
     };
 
     OrderCache cache;
@@ -310,13 +310,38 @@ TEST(OrderCacheTest, MatchesOrders06)
     EXPECT_EQ(matched_amount, 300);
 }
 
+TEST(OrderCacheTest, MatchesOrders07)
+{
+    const std::vector<Order> added_orders{
+        {"OrdId1", "SecId1", "Buy" , 1000, "User1", "CompanyA"},
+        {"OrdId2", "SecId2", "Sell", 3000, "User2", "CompanyB"},
+        {"OrdId3", "SecId1", "Sell",  500, "User3", "CompanyA"},
+        {"OrdId4", "SecId2", "Buy" ,  600, "User4", "CompanyC"},
+        {"OrdId5", "SecId2", "Buy" ,  100, "User5", "CompanyB"},
+        {"OrdId6", "SecId3", "Buy" , 1000, "User6", "CompanyD"},
+        {"OrdId7", "SecId2", "Buy" , 2000, "User7", "CompanyE"},
+        {"OrdId8", "SecId2", "Sell", 5000, "User8", "CompanyE"},
+    };
+
+    OrderCache cache;
+
+    for(const auto& order : added_orders)
+    {
+        cache.addOrder(order);
+    }
+
+    const auto matched_amount = cache.getMatchingSizeForSecurity("SecId2");
+
+    EXPECT_EQ(matched_amount, 2700);
+}
+
 TEST(OrderCacheTest, CancelsNotAddedOrder)
 {
     const std::vector<Order> added_orders{
-        {"o1", "s1", "buy", 100, "u1", "a"},
-        {"o2", "s1", "buy", 200, "u1", "b"},
-        {"o3", "s1", "sell", 200, "u1", "a"},
-        {"o4", "s1", "sell", 100, "u1", "b"},
+        {"o1", "s1", "Buy", 100, "u1", "a"},
+        {"o2", "s1", "Buy", 200, "u1", "b"},
+        {"o3", "s1", "Sell", 200, "u1", "a"},
+        {"o4", "s1", "Sell", 100, "u1", "b"},
     };
 
     OrderCache cache;
@@ -337,18 +362,18 @@ TEST(OrderCacheTest, CancelsNotAddedOrder)
 TEST(OrderCacheTest, HandlesAddingTheSameOrderTwice)
 {
     const std::vector<Order> added_orders{
-        {"o1", "s1", "buy", 100, "u1", "a"},
-        {"o2", "s1", "buy", 200, "u1", "b"},
-        {"o3", "s1", "sell", 200, "u1", "a"},
-        {"o4", "s1", "sell", 100, "u1", "b"},
-        {"o1", "s1", "buy", 100, "u1", "a"},
+        {"o1", "s1", "Buy", 100, "u1", "a"},
+        {"o2", "s1", "Buy", 200, "u1", "b"},
+        {"o3", "s1", "Sell", 200, "u1", "a"},
+        {"o4", "s1", "Sell", 100, "u1", "b"},
+        {"o1", "s1", "Buy", 100, "u1", "a"},
     };
 
     const std::vector<Order> expected_orders{
-        {"o1", "s1", "buy", 100, "u1", "a"},
-        {"o2", "s1", "buy", 200, "u1", "b"},
-        {"o3", "s1", "sell", 200, "u1", "a"},
-        {"o4", "s1", "sell", 100, "u1", "b"},
+        {"o1", "s1", "Buy", 100, "u1", "a"},
+        {"o2", "s1", "Buy", 200, "u1", "b"},
+        {"o3", "s1", "Sell", 200, "u1", "a"},
+        {"o4", "s1", "Sell", 100, "u1", "b"},
     };
 
     OrderCache cache;
@@ -367,18 +392,18 @@ TEST(OrderCacheTest, HandlesAddingTheSameOrderTwice)
 TEST(OrderCacheTest, HandlesAddingOrderWithTheSameIdTwice)
 {
     const std::vector<Order> added_orders{
-        {"o1", "s1", "buy", 100, "u1", "a"},
-        {"o2", "s1", "buy", 200, "u1", "b"},
-        {"o3", "s1", "sell", 200, "u1", "a"},
-        {"o4", "s1", "sell", 100, "u1", "b"},
-        {"o1", "s7", "buy", 700, "u7", "f"},
+        {"o1", "s1", "Buy", 100, "u1", "a"},
+        {"o2", "s1", "Buy", 200, "u1", "b"},
+        {"o3", "s1", "Sell", 200, "u1", "a"},
+        {"o4", "s1", "Sell", 100, "u1", "b"},
+        {"o1", "s7", "Buy", 700, "u7", "f"},
     };
 
     const std::vector<Order> expected_orders{
-        {"o1", "s1", "buy", 100, "u1", "a"},
-        {"o2", "s1", "buy", 200, "u1", "b"},
-        {"o3", "s1", "sell", 200, "u1", "a"},
-        {"o4", "s1", "sell", 100, "u1", "b"},
+        {"o1", "s1", "Buy", 100, "u1", "a"},
+        {"o2", "s1", "Buy", 200, "u1", "b"},
+        {"o3", "s1", "Sell", 200, "u1", "a"},
+        {"o4", "s1", "Sell", 100, "u1", "b"},
     };
 
     OrderCache cache;

@@ -94,7 +94,7 @@ unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityI
     {
         const auto& [key, it_order] = *it;
 
-        if(it_order->side() == "sell")
+        if(it_order->side() == "Sell")
         {
             sell_orders.push_back(std::make_pair(it_order, it_order->qty()));
         }
