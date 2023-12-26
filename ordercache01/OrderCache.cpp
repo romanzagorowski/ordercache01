@@ -97,8 +97,8 @@ unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityI
     /*
        The idea is to:
        -    aggregate qty of companies to limit the number of iterations
-       -    sort buy and sell company qtys in opposite direction to let qtys from the same company
-            to be matched with other companies before they hit themselfs
+       -    sort buy and sell company qty in opposite direction to let qty from the same company
+            to be matched with other companies before they hit themselves
     */
 
     unsigned int total_matched_qty = 0;
@@ -133,8 +133,8 @@ unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityI
     {
         for(auto& [buy_company, buy_remaining_qty] : buy_company_qty)
         {
-            // Do not match qtys from the same company.
-            // Skip already fully matched qtys.
+            // Do not match qty from the same company.
+            // Skip already fully matched qty.
             if(sell_company == buy_company || 0 == buy_remaining_qty)
             {
                 continue; // Continue to the buy qty of the next company.
@@ -149,7 +149,7 @@ unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityI
                 sell_remaining_qty -= matched_qty;
                 buy_remaining_qty = 0;
 
-                continue; // The remaining qty for the buy side has been depleted.
+                continue; // The remaining qty for the long side has been depleted.
                           // Continue to the buy qty of the next company.
             }
             else if(sell_remaining_qty <= buy_remaining_qty)
@@ -161,7 +161,7 @@ unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityI
                 sell_remaining_qty = 0;
                 buy_remaining_qty -= matched_qty;
 
-                break; // The remaining qty for the sell side has been depleted.
+                break; // The remaining qty for the short side has been depleted.
                        // Stop processing the buy qty and continue to the sell qty of the next company.
             }
         }
