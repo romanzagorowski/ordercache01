@@ -4,15 +4,6 @@
 #include <set>
 #include <cassert>
 
-class IdOnlyOrder : public Order
-{
-public:
-    explicit IdOnlyOrder(const std::string& orderId) :
-        Order{ orderId, "", "", 0, "", "" }
-    {
-    }
-};
-
 void OrderCache::addOrder(Order order)
 {
     if(const auto& [it_order, inserted] = orders_table.insert(order); inserted)
@@ -23,30 +14,17 @@ void OrderCache::addOrder(Order order)
     }
 }
 
-void OrderCache::addOrderToIndex(IndexType& index, const std::string& key, const OrderIterator& it_order)
-{
-    index.insert(std::make_pair(key, it_order));
-}
-
-void OrderCache::removeOrderFromIndex(IndexType& index, const OrderIterator& it_order)
-{
-    auto it = index.begin(); 
-    
-    while(it != index.end())
-    {
-        if(it->second == it_order)
-        {
-            it = index.erase(it);
-        }
-        else
-        {
-            it = std::next(it);
-        }
-    }
-}
-
 void OrderCache::cancelOrder(const std::string& orderId)
 {
+    class IdOnlyOrder : public Order
+    {
+    public:
+        explicit IdOnlyOrder(const std::string& orderId) :
+            Order{ orderId, "", "", 0, "", "" }
+        {
+        }
+    };
+
     const auto it_order = orders_table.find(IdOnlyOrder{ orderId });
 
     if(it_order != orders_table.end())
@@ -181,4 +159,26 @@ unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityI
 std::vector<Order> OrderCache::getAllOrders() const
 {
     return std::vector<Order>{ std::begin(orders_table), std::end(orders_table) };
+}
+
+void OrderCache::addOrderToIndex(IndexType& index, const std::string& key, const OrderIterator& it_order)
+{
+    index.insert(std::make_pair(key, it_order));
+}
+
+void OrderCache::removeOrderFromIndex(IndexType& index, const OrderIterator& it_order)
+{
+    auto it = index.begin(); 
+    
+    while(it != index.end())
+    {
+        if(it->second == it_order)
+        {
+            it = index.erase(it);
+        }
+        else
+        {
+            it = std::next(it);
+        }
+    }
 }
