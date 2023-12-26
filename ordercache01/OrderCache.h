@@ -3,7 +3,7 @@
 #include "OrderCacheInterface.h"
 
 #include <unordered_set>
-#include <map>
+#include <unordered_map>
 
 // Compare orders by comparing their ids.
 struct OrderCompare
@@ -50,7 +50,7 @@ public:
 private:
     using OrdersTableType = std::unordered_set<Order, OrderHash, OrderCompare>;
     using OrderIterator = OrdersTableType::const_iterator;
-    using IndexType = std::multimap<std::string, OrderIterator>;
+    using IndexType = std::unordered_multimap<std::string, OrderIterator>;
 
 private:
     OrdersTableType orders_table;

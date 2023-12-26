@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <set>
+#include <map>
 
 void OrderCache::addOrder(Order order)
 {
@@ -93,40 +94,50 @@ void OrderCache::cancelOrdersForSecIdWithMinimumQty(const std::string& securityI
 
 unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityId)
 {
+    /*
+       The idea is to:
+       -    aggregate qty of companies to limit the number of iterations
+       -    sort buy and sell company qtys in opposite direction to let qtys from the same company
+            to be matched with other companies before they hit themselfs
+    */
+
     unsigned int total_matched_qty = 0;
 
-    std::vector<std::pair<OrderIterator, unsigned int>> sell_orders, buy_orders;
+    // SELECT company, SUM(qty) FROM orders WHERE securityId = ? AND side = 'Sell' GROUP BY company ORDER BY company ASC
+    std::map<std::string, unsigned int, std::less<std::string>> sell_company_qty;
+
+    // SELECT company, SUM(qty) FROM orders WHERE securityId = ? AND side = 'Buy' GROUP BY company ORDER BY company DESC
+    std::map<std::string, unsigned int, std::greater<std::string>> buy_company_qty;
 
     // Get a range with all orders for the security.
     auto [range_begin, range_end] = security_index.equal_range(securityId);
 
-    // Select all 'Sell' and 'Buy' orders for the given security
-    // and attach 'remaining qty' field to each of it (initialized by the order's qty).
+    // Get orders qty aggregated by company.
     for(auto it = range_begin; it != range_end; ++it)
     {
         const auto& [key, it_order] = *it;
 
         if(it_order->side() == "Sell")
         {
-            sell_orders.push_back(std::make_pair(it_order, it_order->qty()));
+            sell_company_qty[it_order->company()] += it_order->qty();
         }
         else
         {
-            buy_orders.push_back(std::make_pair(it_order, it_order->qty()));
+            buy_company_qty[it_order->company()] += it_order->qty();
         }
     }
 
     //---
 
-    for(auto& [sel_it_order, sell_remaining_qty] : sell_orders)
+    for(auto& [sell_company, sell_remaining_qty] : sell_company_qty)
     {
-        for(auto& [buy_it_order, buy_remaining_qty] : buy_orders)
+        for(auto& [buy_company, buy_remaining_qty] : buy_company_qty)
         {
-            // Do not match orders from the same company.
-            // Skip already fully matched orders.
-            if(sel_it_order->company() == buy_it_order->company() || 0 == buy_remaining_qty)
+            // Do not match qtys from the same company.
+            // Skip already fully matched qtys.
+            if(sell_company == buy_company || 0 == buy_remaining_qty)
             {
-                continue; // Continue to the next buy order.
+                continue; // Continue to the buy qty of the next company.
             }
 
             if(sell_remaining_qty > buy_remaining_qty)
@@ -138,10 +149,10 @@ unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityI
                 sell_remaining_qty -= matched_qty;
                 buy_remaining_qty = 0;
 
-                continue; // The remaining qty for the buy order has been depleted.
-                          // Continue to the next buy order.
+                continue; // The remaining qty for the buy side has been depleted.
+                          // Continue to the buy qty of the next company.
             }
-            else if(sell_remaining_qty < buy_remaining_qty)
+            else if(sell_remaining_qty <= buy_remaining_qty)
             {
                 const unsigned int matched_qty = sell_remaining_qty;
 
@@ -150,20 +161,8 @@ unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityI
                 sell_remaining_qty = 0;
                 buy_remaining_qty -= matched_qty;
 
-                break; // The remaining qty for the sell order has been depleted.
-                       // Stop processing the buy orders and continue to the next sell order.
-            }
-            else if(sell_remaining_qty == buy_remaining_qty)
-            {
-                const unsigned int matched_qty = sell_remaining_qty;
-
-                total_matched_qty += matched_qty;
-
-                sell_remaining_qty = 0;
-                buy_remaining_qty = 0;
-
-                break; // The remaining qty for the sell order has been depleted.
-                       // Stop processing the buy orders and continue to the next sell order.
+                break; // The remaining qty for the sell side has been depleted.
+                       // Stop processing the buy qty and continue to the sell qty of the next company.
             }
         }
     }
