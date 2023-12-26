@@ -1,0 +1,8 @@
+1. DONE. OrderHasher and OrderComparer with noexcept.
+2. Matching method optimization:
+	* Iterator with filter (???). We dont copy elements from a collection. Just iterate skipping some elements (filtering out).
+	* A list? Easy depleted elements removal. Less elements to iterate over.
+3. An index optimization:
+	* References instead of string copies?
+	* Some other collection than vector?
+

@@ -8,7 +8,7 @@
 // Compare orders by comparing their ids.
 struct OrderCompare
 {
-    bool operator () (const Order& o1, const Order& o2) const
+    bool operator () (const Order& o1, const Order& o2) const noexcept
     {
         return o1.orderId() == o2.orderId();
     }
@@ -17,7 +17,7 @@ struct OrderCompare
 // Hash an order by hashing its id.
 struct OrderHash
 {
-    std::size_t operator () (const Order& o) const
+    std::size_t operator () (const Order& o) const noexcept
     {
         return hash(o.orderId());
     }
