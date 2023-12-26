@@ -84,7 +84,7 @@ unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityI
 {
     unsigned int total_matched_qty = 0;
 
-    std::vector<std::pair<std::unordered_set<Order>::const_iterator, unsigned int>> sell_orders, buy_orders;
+    std::vector<std::pair<OrderIterator, unsigned int>> sell_orders, buy_orders;
 
     // Select all 'sell' and 'buy' orders for the given security
     // and attach 'remaining qty' field to each of it (initialized by the order's qty).
