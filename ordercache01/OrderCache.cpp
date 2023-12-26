@@ -189,6 +189,8 @@ void OrderCache::removeOrderFromIndex(IndexType& index, const OrderIterator& it_
         if(it->second == it_order)
         {
             it = index.erase(it);
+
+            break;
         }
         else
         {
